@@ -51,6 +51,9 @@ public class Dome extends PGraphics3D {
   protected PShape domeSphere;
   protected PShape gridSphere;
 
+  protected PShader cubeMapEquirectShader;
+  protected PShape domeQuad;
+
   protected int resolution;
   protected int offsetX, offsetY;
   
@@ -64,6 +67,7 @@ public class Dome extends PGraphics3D {
   protected boolean renderDome = true;
   protected boolean renderGrid = false;
   protected int currentFace;
+  protected boolean equirectangular = true;
   
   protected boolean requestedRenderDomeChange = false;
   protected boolean requestedRenderDome;  
@@ -242,9 +246,14 @@ public class Dome extends PGraphics3D {
     if (renderDome && 0 < parent.frameCount) {
       endFaceDraw();
 
+      int lastFace = PGL.TEXTURE_CUBE_MAP_POSITIVE_Z;
+      if (equirectangular) {
+        lastFace = PGL.TEXTURE_CUBE_MAP_NEGATIVE_Z;
+      }
+
       // Draw the rest of the cubemap faces
       for (int face = PGL.TEXTURE_CUBE_MAP_NEGATIVE_X; 
-               face <= PGL.TEXTURE_CUBE_MAP_POSITIVE_Z; face++) {
+               face <= lastFace; face++) {
         beginFaceDraw(face);
         parent.draw();
         endFaceDraw();      
@@ -316,6 +325,18 @@ public class Dome extends PGraphics3D {
       cubeMapShader = parent.loadShader("cubeMapFrag.glsl", 
                                         "cubeMapVert.glsl"); 
       cubeMapShader.set("cubemap", 1);
+    }
+
+    if (domeQuad == null) {
+      // todo: mapping is not linear, so we need more than the four corner vertices
+      domeQuad = createShape(QUAD, -1f, -1f, -1f, 1f, 1f, 1f, 1f, -1f);
+      domeQuad.setStroke(false);
+    }
+
+    if (cubeMapEquirectShader == null) {
+      cubeMapEquirectShader = parent.loadShader("cubeMapFrag.glsl", 
+                                                "cubeMapEquirectVert.glsl"); 
+      cubeMapEquirectShader.set("cubemap", 1);
     }
     
     
@@ -407,19 +428,32 @@ public class Dome extends PGraphics3D {
     
     // This setting might be better for 2.1.2+:
 //    camera(0, 0, resolution * 0.5f, 0, 0, 0, 0, 1, 0);
-//    ortho(-width/2, width/2, -height/2, height/2);
+//    ortho(-width/2, width/2, -height/2, height/2); 
     
-    camera();
-    ortho(domeLeft, domeRight, domeBottom, domeTop);
-    resetMatrix();    
-    translate(domeDX, domeDY, domeDZ);
-    scale(domeScale);      
-    if (renderGrid) {   
-      shape(gridSphere);
-    } else {
-      shader(cubeMapShader);
-      shape(domeSphere);
-      resetShader();      
+    if (equirectangular) {  
+      // todo: set up camera correctly to render quad to fill screen
+      camera(0, 0, resolution * 0.5f, 0, 0, 0, 0, 1, 0);
+      ortho(-width/2, width/2, -height/2, height/2);
+      
+      shader(cubeMapEquirectShader);
+      shape(domeQuad);
+      resetShader();
+    
+    } else {   
+
+      camera();    
+      ortho(domeLeft, domeRight, domeBottom, domeTop);
+      resetMatrix();    
+      translate(domeDX, domeDY, domeDZ);
+      scale(domeScale); 
+      if (renderGrid) {   
+        shape(gridSphere);
+      } else {
+        shader(cubeMapShader);
+        shape(domeSphere);
+        resetShader();      
+      }
+    
     }
     renderScreen();
   }
