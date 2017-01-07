@@ -306,13 +306,13 @@ public class Dome extends PGraphics3D {
   
   protected void initDome() {
     if (domeSphere == null) {
-      domeSphere = createShape(SPHERE, resolution * 0.5f, 50, 50);
+      domeSphere = createShape(SPHERE, resolution * 0.5f);
       domeSphere.rotateX(HALF_PI);
       domeSphere.setStroke(false);
     }
     
     if (gridSphere == null) {
-      gridSphere = createShape(SPHERE, resolution * 0.5f, 25, 25);
+      gridSphere = createShape(SPHERE, resolution * 0.5f);
       gridSphere.rotateX(HALF_PI);
       gridSphere.setFill(0xFF000000);
       gridSphere.setStroke(0xFFFFFFFF);      
