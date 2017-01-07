@@ -56,6 +56,7 @@ public class Dome extends PGraphics3D {
 
   protected int resolution;
   protected int offsetX, offsetY;
+  protected int screenWidth, screenHeight;
   
   protected IntBuffer cubeMapFbo;
   protected IntBuffer cubeMapRbo;
@@ -143,6 +144,10 @@ public class Dome extends PGraphics3D {
     domeRight = iwidth;
     domeBottom = 0;
     domeTop = iheight;    
+
+    screenWidth = iwidth;
+    screenHeight = iheight;
+
     super.setSize(iwidth, iheight);
   }
   
@@ -328,7 +333,8 @@ public class Dome extends PGraphics3D {
     }
 
     if (domeQuad == null) {
-      domeQuad = createShape(QUAD, -1f, -1f, -1f, 1f, 1f, 1f, 1f, -1f);
+      float x = 1.0f; 
+      domeQuad = createShape(QUAD, -x, -x, -x, x, x, x, x, -x);
       domeQuad.setStroke(false);
     }
 
@@ -336,6 +342,7 @@ public class Dome extends PGraphics3D {
       cubeMapEquirectShader = parent.loadShader("cubeMapEquirectFrag.glsl", 
                                                 "cubeMapEquirectVert.glsl"); 
       cubeMapEquirectShader.set("cubemap", 1);
+      cubeMapEquirectShader.set("resolution", screenWidth * 1.0f, screenHeight * 1.0f);
     }
     
     
@@ -430,10 +437,8 @@ public class Dome extends PGraphics3D {
 //    ortho(-width/2, width/2, -height/2, height/2); 
     
     if (equirectangular) {  
-      // todo: set up camera correctly to render quad to fill screen
-      camera(0, 0, resolution * 0.5f, 0, 0, 0, 0, 1, 0);
-      ortho(-width/2, width/2, -height/2, height/2);
-      
+
+      ortho(-1, 1, -1, 1);
       shader(cubeMapEquirectShader);
       shape(domeQuad);
       resetShader();
