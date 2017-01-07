@@ -20,8 +20,4 @@ void main() {
   vec3 color = vec3(textureCube(cubemap, reflectDir));
   gl_FragColor = vec4(color, 1.0); 
 
-  // debugging stuff
-  //if ((1.0 - abs(x)) < 0.05) { gl_FragColor.rgb = vec3(0.0, 1.0, 1.0); }     
-  //if ((1.0 - abs(y)) < 0.05) { gl_FragColor.rgb = vec3(0.0, 1.0, 1.0); }     
-  //gl_FragColor.rgb += 0.2 * vec3(x, 0, y);
 }

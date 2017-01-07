@@ -51,9 +51,6 @@ public class Dome extends PGraphics3D {
   protected PShape domeSphere;
   protected PShape gridSphere;
 
-  protected PShader cubeMapEquirectShader;
-  protected PShape domeQuad;
-
   protected int resolution;
   protected int offsetX, offsetY;
   protected int screenWidth, screenHeight;
@@ -68,7 +65,7 @@ public class Dome extends PGraphics3D {
   protected boolean renderDome = true;
   protected boolean renderGrid = false;
   protected int currentFace;
-  protected boolean equirectangular = true;
+  protected int lastFace;
   
   protected boolean requestedRenderDomeChange = false;
   protected boolean requestedRenderDome;  
@@ -251,11 +248,6 @@ public class Dome extends PGraphics3D {
     if (renderDome && 0 < parent.frameCount) {
       endFaceDraw();
 
-      int lastFace = PGL.TEXTURE_CUBE_MAP_POSITIVE_Z;
-      if (equirectangular) {
-        lastFace = PGL.TEXTURE_CUBE_MAP_NEGATIVE_Z;
-      }
-
       // Draw the rest of the cubemap faces
       for (int face = PGL.TEXTURE_CUBE_MAP_NEGATIVE_X; 
                face <= lastFace; face++) {
@@ -312,7 +304,7 @@ public class Dome extends PGraphics3D {
   }
   
   
-  private void initDome() {
+  protected void initDome() {
     if (domeSphere == null) {
       domeSphere = createShape(SPHERE, resolution * 0.5f, 50, 50);
       domeSphere.rotateX(HALF_PI);
@@ -331,20 +323,6 @@ public class Dome extends PGraphics3D {
                                         "cubeMapVert.glsl"); 
       cubeMapShader.set("cubemap", 1);
     }
-
-    if (domeQuad == null) {
-      float x = 1.0f; 
-      domeQuad = createShape(QUAD, -x, -x, -x, x, x, x, x, -x);
-      domeQuad.setStroke(false);
-    }
-
-    if (cubeMapEquirectShader == null) {
-      cubeMapEquirectShader = parent.loadShader("cubeMapEquirectFrag.glsl", 
-                                                "cubeMapEquirectVert.glsl"); 
-      cubeMapEquirectShader.set("cubemap", 1);
-      cubeMapEquirectShader.set("resolution", screenWidth * 1.0f, screenHeight * 1.0f);
-    }
-    
     
     if (!cubeMapInit) {
       PGL pgl = beginPGL();
@@ -389,6 +367,7 @@ public class Dome extends PGraphics3D {
       
       endPGL();
       
+      lastFace = PGL.TEXTURE_CUBE_MAP_POSITIVE_Z;
       cubeMapInit = true;
     }
   }
@@ -429,41 +408,31 @@ public class Dome extends PGraphics3D {
   }
 
   
-  private void renderDome() {
+  protected void renderDome() {
     renderBorder();
     
     // This setting might be better for 2.1.2+:
 //    camera(0, 0, resolution * 0.5f, 0, 0, 0, 0, 1, 0);
 //    ortho(-width/2, width/2, -height/2, height/2); 
     
-    if (equirectangular) {  
-
-      ortho(-1, 1, -1, 1);
-      shader(cubeMapEquirectShader);
-      shape(domeQuad);
-      resetShader();
-    
-    } else {   
-
-      camera();    
-      ortho(domeLeft, domeRight, domeBottom, domeTop);
-      resetMatrix();    
-      translate(domeDX, domeDY, domeDZ);
-      scale(domeScale); 
-      if (renderGrid) {   
-        shape(gridSphere);
-      } else {
-        shader(cubeMapShader);
-        shape(domeSphere);
-        resetShader();      
-      }
-    
+    camera();    
+    ortho(domeLeft, domeRight, domeBottom, domeTop);
+    resetMatrix();    
+    translate(domeDX, domeDY, domeDZ);
+    scale(domeScale); 
+    if (renderGrid) {   
+      shape(gridSphere);
+    } else {
+      shader(cubeMapShader);
+      shape(domeSphere);
+      resetShader();      
     }
+  
     renderScreen();
   }
   
   
-  private void renderBorder() {
+  protected void renderBorder() {
     if (borderMethod != null) {
       try {
         borderMethod.invoke(parent, new Object[] {});
@@ -473,7 +442,7 @@ public class Dome extends PGraphics3D {
     }    
   }
   
-  private void renderScreen() {
+  protected void renderScreen() {
     if (screenMethod != null) {
       try {
         screenMethod.invoke(parent, new Object[] {});
@@ -497,4 +466,5 @@ public class Dome extends PGraphics3D {
     System.out.println("##library.name## ##library.prettyVersion## by ##author##");
   }  
 }
+
 
