@@ -1,1 +1,5 @@
-attribute vec4 vertex;varying vec3 reflectDir;const float PI = 3.1415926535897932384626433832795;void main() {  gl_Position =  vertex;    float theta = gl_Position.x * PI;  float phi = gl_Position.y * PI / 2.0;      reflectDir = vec3(cos(phi) * cos(theta), sin(phi), cos(phi) * sin(theta));}
+attribute vec4 vertex;
+
+void main() {
+  gl_Position = vertex;
+}

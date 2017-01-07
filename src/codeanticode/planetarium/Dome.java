@@ -328,13 +328,12 @@ public class Dome extends PGraphics3D {
     }
 
     if (domeQuad == null) {
-      // todo: mapping is not linear, so we need more than the four corner vertices
       domeQuad = createShape(QUAD, -1f, -1f, -1f, 1f, 1f, 1f, 1f, -1f);
       domeQuad.setStroke(false);
     }
 
     if (cubeMapEquirectShader == null) {
-      cubeMapEquirectShader = parent.loadShader("cubeMapFrag.glsl", 
+      cubeMapEquirectShader = parent.loadShader("cubeMapEquirectFrag.glsl", 
                                                 "cubeMapEquirectVert.glsl"); 
       cubeMapEquirectShader.set("cubemap", 1);
     }
