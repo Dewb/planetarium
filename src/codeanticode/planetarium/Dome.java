@@ -306,12 +306,14 @@ public class Dome extends PGraphics3D {
   
   protected void initDome() {
     if (domeSphere == null) {
+      sphereDetail(50);
       domeSphere = createShape(SPHERE, resolution * 0.5f);
       domeSphere.rotateX(HALF_PI);
       domeSphere.setStroke(false);
     }
     
     if (gridSphere == null) {
+      sphereDetail(25);
       gridSphere = createShape(SPHERE, resolution * 0.5f);
       gridSphere.rotateX(HALF_PI);
       gridSphere.setFill(0xFF000000);
@@ -411,12 +413,9 @@ public class Dome extends PGraphics3D {
   protected void renderDome() {
     renderBorder();
     
-    // This setting might be better for 2.1.2+:
-//    camera(0, 0, resolution * 0.5f, 0, 0, 0, 0, 1, 0);
-//    ortho(-width/2, width/2, -height/2, height/2); 
+    camera(0, 0, resolution * 0.5f, 0, 0, 0, 0, 1, 0);
+    ortho(-width/2, width/2, -height/2, height/2); 
     
-    camera();    
-    ortho(domeLeft, domeRight, domeBottom, domeTop);
     resetMatrix();    
     translate(domeDX, domeDY, domeDZ);
     scale(domeScale); 
